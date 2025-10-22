@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: bloodstream-backend
+    env: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    envVars:
+      - key: MONGODB_URI
+        value: ""
+      - key: CLIENT_ORIGIN
+        # Example: https://bloodstream-frontend.onrender.com
+        value: ""
