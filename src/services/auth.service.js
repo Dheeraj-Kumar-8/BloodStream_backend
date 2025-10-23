@@ -137,7 +137,7 @@ const sendOtp = async ({ email, phoneNumber, userId, channel = 'sms' }) => {
   return response;
 };
 
-const verifyOtp = async ({ email, phoneNumber, userId, code }) => {
+const verifyOtp = async ({ email, phoneNumber, userId, code }, req, res) => {
   if (!code) {
     throw new AppError('OTP code is required', StatusCodes.BAD_REQUEST);
   }
@@ -184,6 +184,10 @@ const verifyOtp = async ({ email, phoneNumber, userId, code }) => {
   user.otpVerifiedAt = new Date();
   await user.save();
   await OtpCode.deleteOne({ _id: otpDoc._id });
+
+  // After successful verification, sign tokens and set cookies so the user is authenticated immediately
+  const tokens = createAuthTokens(user);
+  setAuthCookies(res, tokens);
 
   return { message: 'OTP verified successfully', user: sanitizeUser(user) };
 };

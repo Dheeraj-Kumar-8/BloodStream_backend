@@ -29,7 +29,7 @@ const sendOtp = async (req, res, next) => {
 
 const verifyOtp = async (req, res, next) => {
   try {
-    const data = await authService.verifyOtp(req.body);
+    const data = await authService.verifyOtp(req.body, req, res);
     res.json(data);
   } catch (error) {
     next(error);

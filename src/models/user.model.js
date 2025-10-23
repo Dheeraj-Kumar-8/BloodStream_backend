@@ -1,5 +1,18 @@
 const mongoose = require('mongoose');
 
+// Normalize Indian phone numbers to +91XXXXXXXXXX
+function normalizeIndianPhone(raw) {
+  if (!raw) return raw;
+  const digits = String(raw).replace(/\D/g, '');
+  let d = digits.replace(/^0+/, '');
+  if (d.length === 12 && d.startsWith('91')) d = d.slice(2);
+  if (d.length === 10) return `+91${d}`;
+  if (d.length === 11 && d.startsWith('91')) return `+${d}`;
+  if (d.length === 12 && d.startsWith('91')) return `+${d}`;
+  if (String(raw).trim().startsWith('+')) return String(raw).trim();
+  return String(raw).trim();
+}
+
 const healthMetricSchema = new mongoose.Schema(
   {
     hemoglobin: Number,
@@ -76,6 +89,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      validate: {
+        validator: function (v) {
+          const n = normalizeIndianPhone(v);
+          return /^\+91[6-9]\d{9}$/.test(n);
+        },
+        message: 'Invalid Indian mobile number',
+      },
     },
     passwordHash: {
       type: String,
@@ -159,3 +179,11 @@ userSchema.index({ 'location.coordinates': '2dsphere' });
 userSchema.index({ role: 1 });
 
 module.exports = mongoose.model('User', userSchema);
+
+// Ensure phone number is stored normalized
+userSchema.pre('validate', function (next) {
+  if (this.phoneNumber) {
+    this.phoneNumber = normalizeIndianPhone(this.phoneNumber);
+  }
+  next();
+});
