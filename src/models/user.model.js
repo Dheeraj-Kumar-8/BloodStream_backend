@@ -178,8 +178,6 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ 'location.coordinates': '2dsphere' });
 userSchema.index({ role: 1 });
 
-module.exports = mongoose.model('User', userSchema);
-
 // Ensure phone number is stored normalized
 userSchema.pre('validate', function (next) {
   if (this.phoneNumber) {
@@ -187,3 +185,5 @@ userSchema.pre('validate', function (next) {
   }
   next();
 });
+
+module.exports = mongoose.model('User', userSchema);
